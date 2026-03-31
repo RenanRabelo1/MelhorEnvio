@@ -7,4 +7,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://sandbox.melhorenvio.com.br',
+        changeOrigin: true,
+      }
+    }
+  }
 })
