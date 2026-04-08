@@ -6,7 +6,7 @@ export default function Home() {
   const [abaAtiva, setAbaAtiva] = useState("calculadora");
   
   // Estados da Calculadora
-  const [cepOrigem, setCepOrigem] = useState("");
+  const [cepOrigem, setCepOrigem] = useState("05407002");
   const [cepDestino, setCepDestino] = useState("");
   const [height, setHeight] = useState("");
   const [width, setWidth] = useState("");
@@ -92,7 +92,7 @@ export default function Home() {
         {abaAtiva === "calculadora" && (
           <div className="max-w-2xl">
             {/* CAIXA DO FORMULÁRIO */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
+            <div className="bg-white text-black p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
               <form onSubmit={calcularFrete} className="space-y-4">
                 <Input label="CEP de Origem" placeholder="Ex: 01001-000" value={cepOrigem} onChange={(e) => setCepOrigem(e.target.value)} />
                 <Input label="CEP de Destino" placeholder="Ex: 01001-000" value={cepDestino} onChange={(e) => setCepDestino(e.target.value)} />
