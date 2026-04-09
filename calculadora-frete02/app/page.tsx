@@ -78,9 +78,18 @@ export default function Home() {
     };
 
     try {
-      
-      const buscarinformacoesProduto = await fetch(`/api/produtos`);
-      
+    const buscarinformacoesProduto = await fetch(`/api/produtos?nome=${produto}`, {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+  },
+}); 
+      const informacoesProduto = await buscarinformacoesProduto.json();
+
+      if(buscarinformacoesProduto.ok){ 
+        console.log("Informações do produto encontrado:", informacoesProduto);
+      }
+
       const resposta = await fetch("/api/calcular-frete", {
         method: "POST",
         headers: {
