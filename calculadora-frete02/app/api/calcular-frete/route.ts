@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const resposta = await fetch('https://sandbox.melhorenvio.com.br/api/v2/me/shipment/calculate', opcoes);
     const dados = await resposta.json();
 
-    // 4. Devolvemos a resposta limpinha para o nosso frontend mostrar na tela!
+    
     return NextResponse.json(dados);
 
   } catch (erro) {
