@@ -1,24 +1,60 @@
 "use client";
 import { useState } from "react";
-import { Input } from "../components/Input";
+import { Input } from "@/components/Input";
 
 export default function Home() {
   const [abaAtiva, setAbaAtiva] = useState("calculadora");
   
   // Estados da Calculadora
   const [cepOrigem, setCepOrigem] = useState("05407002");
-  const [cepDestino, setCepDestino] = useState("");
+  const [cepDestino, setCepDestino] = useState("60813690");
   const [height, setHeight] = useState("");
   const [width, setWidth] = useState("");
   const [length, setLength] = useState("");
   const [weight, setWeight] = useState("");
-  const [frete, setFrete] = useState<any>(null); // Guardará o resultado da API
+  const [frete, setFrete] = useState<any>(null);
+  const [produto, setProduto] = useState("");
+  const [nomeProduto, setNomeProduto] = useState("");
+  const [novaAltura, setNovaAltura] = useState("");
+  const [novaLargura, setNovaLargura] = useState("");
+  const [novoPeso, setNovoPeso] = useState("");
+  const [novaProfundidade, setNovaProfundidade] = useState("");
+  
+ async function cadastrarProdutos(e: React.FormEvent) {
+  e.preventDefault();
+  console.log("Cadastrando novo produto", {nomeProduto, novaAltura, novaLargura, novoPeso, novaProfundidade});
+
+  const novoProduto = {
+    nome: nomeProduto,
+    altura: Number(novaAltura),
+    largura: Number(novaLargura),
+    profundidade: Number(novaProfundidade),
+    peso: Number(novoPeso),
+    valor_seguro: 10.0,
+    quantidade: 1,
+  };
+
+  try {
+    const resposta = await fetch("/api/produtos", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(novoProduto),
+    });
+    if(resposta.ok){
+      alert("Produto cadastrado com sucesso!");
+    }
+  } catch (erro) {
+    console.error("Erro ao cadastrar produto:", erro);
+  }
+ }
 
  
-  async function calcularFrete(evento: React.FormEvent) {
-    evento.preventDefault(); 
+  async function calcularFrete(e: React.FormEvent) {
+    e.preventDefault(); 
     
-    console.log("Chamando o nosso garçom (API interna)...");
+    console.log("Chamando a API com ", {cepOrigem, cepDestino, height, width, length, weight});
 
     
     const pacoteDeDados = {
@@ -43,6 +79,8 @@ export default function Home() {
 
     try {
       
+      const buscarinformacoesProduto = await fetch(`/api/produtos`);
+      
       const resposta = await fetch("/api/calcular-frete", {
         method: "POST",
         headers: {
@@ -51,12 +89,10 @@ export default function Home() {
         body: JSON.stringify(pacoteDeDados),
       });
 
-      // 3. Pegamos a resposta que o nosso back-end devolveu
       const resultado = await resposta.json();
       
-      console.log("A cozinha (Melhor Envio) respondeu:", resultado);
+      console.log("Os fretes são:", resultado);
       
-      // 4. Salvamos o resultado no estado para podermos desenhar na tela depois!
       setFrete(resultado);
 
     } catch (erro) {
@@ -94,14 +130,11 @@ export default function Home() {
             {/* CAIXA DO FORMULÁRIO */}
             <div className="bg-white text-black p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
               <form onSubmit={calcularFrete} className="space-y-4">
-                <Input label="CEP de Origem" placeholder="Ex: 01001-000" value={cepOrigem} onChange={(e) => setCepOrigem(e.target.value)} />
-                <Input label="CEP de Destino" placeholder="Ex: 01001-000" value={cepDestino} onChange={(e) => setCepDestino(e.target.value)} />
+                <Input label="CEP de Origem" placeholder="01001-000" value={cepOrigem} onChange={(e) => setCepOrigem(e.target.value)} />
+                <Input label="CEP de Destino" placeholder="01001-000" value={cepDestino} onChange={(e) => setCepDestino(e.target.value)} />
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <Input label="Altura (cm)" type="number" placeholder="Ex: 10" value={height} onChange={(e) => setHeight(e.target.value)} />
-                  <Input label="Largura (cm)" type="number" placeholder="Ex: 10" value={width} onChange={(e) => setWidth(e.target.value)} />
-                  <Input label="Comprimento (cm)" type="number" placeholder="Ex: 10" value={length} onChange={(e) => setLength(e.target.value)} />
-                  <Input label="Peso (kg)" type="number" placeholder="Ex: 1" value={weight} onChange={(e) => setWeight(e.target.value)} />
+                  <Input label="Produto" placeholder="Nome do produto" value={produto} onChange={(e) => setProduto(e.target.value)} />
                 </div>
 
                 <button type="submit" className="w-full p-3 mt-4 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold transition-colors">
@@ -109,50 +142,28 @@ export default function Home() {
                 </button>
               </form>
             </div>
-
-            {/* CAIXA DE RESULTADOS (SÓ APARECE SE TIVERMOS O FRETE) */}
-            {frete && Array.isArray(frete) && (
-              <div>
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Opções Disponíveis</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  
-                  {/* Aqui o .map() vai desenhar um card para cada transportadora */}
-                  {frete.map((opcao: any) => {
-                    // O Melhor Envio retorna um campo "error" se a transportadora não entregar nessa rota ou peso
-                    if (opcao.error) return null;
-
-                    return (
-                      <div key={opcao.id} className="bg-white border-2 border-green-100 rounded-xl p-5 shadow-sm hover:border-green-400 hover:shadow-md transition-all flex flex-col justify-between h-full">
-                        <div>
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-bold text-gray-800 text-lg leading-tight">{opcao.name}</h3>
-                            <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">
-                              {opcao.company?.name}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-end">
-                          <div>
-                            <p className="text-gray-500 text-xs uppercase tracking-wider font-semibold">Prazo</p>
-                            <p className="text-gray-700 font-medium">{opcao.custom_delivery_time} dias úteis</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-gray-500 text-xs uppercase tracking-wider font-semibold">Valor</p>
-                            <p className="text-green-600 font-black text-2xl">R$ {opcao.price}</p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  
-                </div>
-              </div>
-            )}
-            
           </div>
         )}
+        {abaAtiva === "produtos" && (
+          <div className="max-w-2xl">
 
+          <div className="bg-white text-black p-6 rounded-xl shadow-sm border border-gray-200">
+            <h2 className="text-2xl font-bold mb-4">Cadastrar Novo Produto</h2>
+
+              <form onSubmit={cadastrarProdutos} className="space-y-4">
+
+                    <Input label="Nome do Produto" placeholder="Digite o nome do produto" value={nomeProduto} onChange={(e) => setNomeProduto(e.target.value)} />
+                    <Input label="Altura (cm)" type="number" placeholder="Ex: 10" value={novaAltura} onChange={(e) => setNovaAltura(e.target.value)} />
+                    <Input label="Largura (cm)" type="number" placeholder="Ex: 15" value={novaLargura} onChange={(e) => setNovaLargura(e.target.value)} />
+                    <Input label="Profundidade (cm)" type="number" placeholder="Ex: 20" value={novaProfundidade} onChange={(e) => setNovaProfundidade(e.target.value)} />
+                    <Input label="Peso (kg)" type="number" placeholder="Ex: 0.5" value={novoPeso} onChange={(e) => setNovoPeso(e.target.value)} />
+                    <button type="submit" className="w-full p-3 mt-4 rounded-lg bg-green-600 hover:bg-green-700 text-white font-bold transition-colors">
+                    Salvar Produto
+                    </button>
+                </form>
+           </div>
+          </div>
+        )}
       </main>
     </div>
   );
