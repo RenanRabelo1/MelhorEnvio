@@ -56,27 +56,6 @@ export default function Home() {
     
     console.log("Chamando a API com ", {cepOrigem, cepDestino, height, width, length, weight});
 
-    
-    const pacoteDeDados = {
-      from: {
-        postal_code: cepOrigem,
-      },
-      to: {
-        postal_code: cepDestino,
-      },
-      products: [
-        {
-          id: "produto-1",
-          width: Number(width),
-          height: Number(height),
-          length: Number(length),
-          weight: Number(weight),
-          insurance_value: 10.0, 
-          quantity: 1,
-        },
-      ],
-    };
-
     try {
     const buscarinformacoesProduto = await fetch(`/api/produtos?nome=${produto}`, {
   method: "GET",
@@ -88,7 +67,29 @@ export default function Home() {
 
       if(buscarinformacoesProduto.ok){ 
         console.log("Informações do produto encontrado:", informacoesProduto);
-      }
+
+        const pacoteDeDados = {
+          from: {
+            postal_code: cepOrigem,
+          },
+          to: {
+            postal_code: cepDestino,
+              },
+              products: [
+                  {
+                    id: "produto-1",
+                    width: Number(informacoesProduto.largura),
+                    height: Number(informacoesProduto.altura),
+                    length: Number(informacoesProduto.profundidade),
+                    weight: Number(informacoesProduto.peso),
+                    insurance_value: 10.0,
+                    quantity: 1,
+
+                  },
+              ],
+          };
+
+      
 
       const resposta = await fetch("/api/calcular-frete", {
         method: "POST",
@@ -100,10 +101,13 @@ export default function Home() {
 
       const resultado = await resposta.json();
       
+    
       console.log("Os fretes são:", resultado);
       
       setFrete(resultado);
-
+    } else{
+      alert("O produto que você digitou não existe no banco de dados ou possui algum erro de digitação. Por favor, verifique o nome do produto e tente novamente.");
+    } 
     } catch (erro) {
       console.error("Erro ao chamar nossa API:", erro);
     }

@@ -34,15 +34,15 @@ export async function POST(request: Request) {
 
 
 export async function GET(request: Request) {
-  // 1. Pegamos a URL da requisição
+  
   const { searchParams } = new URL(request.url);
   
-  // 2. Extraímos o valor do parâmetro "nome"
+ 
   const nomeBuscado = searchParams.get("nome");
 
   try {
     if (nomeBuscado) {
-      // 3. Buscamos no banco usando o parâmetro $1 para evitar SQL Injection 🛡️
+      
       const query = "SELECT * FROM produtos WHERE nome = $1 LIMIT 1";
       const resultado = await pool.query(query, [nomeBuscado]);
 
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
       return NextResponse.json(resultado.rows[0]);
     }
 
-    // Caso não passe nome, retorna todos (útil para listagens)
+   
     const todos = await pool.query("SELECT * FROM produtos");
     return NextResponse.json(todos.rows);
 
